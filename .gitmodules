@@ -1,0 +1,3 @@
+[submodule "src/assets/Monsters"]
+	path = src/assets/Monsters
+	url = git@github-ethan:SatoshisPalace/Monsters.git
