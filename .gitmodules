@@ -1,3 +1,6 @@
 [submodule "src/assets/Monsters"]
 	path = src/assets/Monsters
 	url = https://github.com/SatoshisPalace/Monsters.git
+[submodule "Reality"]
+	path = Reality
+	url = https://github.com/ArcAOGaming/Reality
