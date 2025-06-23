@@ -4,3 +4,9 @@
 [submodule "Reality"]
 	path = Reality
 	url = https://github.com/ArcAOGaming/Reality
+[submodule "RuneRealm-LUA"]
+	path = RuneRealm-LUA
+	url = git@github-ethan:ArcAOGaming/RuneRealm-LUA.git
+[submodule "RuneRealm-Assets"]
+	path = RuneRealm-Assets
+	url = git@github-ethan:ArcAOGaming/RuneRealm-Assets.git
