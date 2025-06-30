@@ -485,7 +485,7 @@ const processTurnsSequentially = async () => {
                   >
                     {/* Battle Scene */}
                     <div
-                      className="relrelative mx-auto w-full max-w-[95vw]"
+                      className="relrelative mx-auto w-full max-w-[100vw]"
                       style={{
                         aspectRatio: "16 / 9",
                         maxHeight: "60vh",
