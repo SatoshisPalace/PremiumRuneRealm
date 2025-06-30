@@ -505,7 +505,7 @@ const processTurnsSequentially = async () => {
                         onShieldComplete={() => setShieldRestoring(false)}
                         onRoundComplete={() => setShowEndOfRound(false)}
                       />
-                      <BattleStats battle={activeBattle} theme={theme} />
+                     
                     </div>
                   </div>
 

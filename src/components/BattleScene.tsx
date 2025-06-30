@@ -66,11 +66,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
       
       {/* Player Monster */}
       <div 
-        className="absolute bottom-[15%] transition-all duration-[750ms] ease-in-out"
-        style={{ 
-          left: playerPosition === 'attack' ? BATTLE_POSITIONS.ATTACK_OFFSET : BATTLE_POSITIONS.HOME_OFFSET
-        }}
-      >
+  className="absolute bottom-[15%] transition-all duration-[750ms] ease-in-out scale-[0.75] origin-bottom"
+  style={{ 
+    left: playerPosition === 'attack' ? BATTLE_POSITIONS.ATTACK_OFFSET : BATTLE_POSITIONS.HOME_OFFSET
+  }}
+>
         {/* Stats Display */}
         <div className="absolute -top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 w-40">
           {/* Shield Bar */}
@@ -101,15 +101,17 @@ const BattleScene: React.FC<BattleSceneProps> = ({
           currentAnimation={playerAnimation}
           onAnimationComplete={onPlayerAnimationComplete}
         />
+       
       </div>
       
       {/* Opponent Monster */}
       <div 
-        className="absolute bottom-[15%] transition-all duration-[750ms] ease-in-out"
-        style={{ 
-          right: opponentPosition === 'attack' ? BATTLE_POSITIONS.ATTACK_OFFSET : BATTLE_POSITIONS.HOME_OFFSET
-        }}
-      >
+  className="absolute bottom-[15%] transition-all duration-[750ms] ease-in-out scale-[0.75] origin-bottom"
+  style={{ 
+    right: opponentPosition === 'attack' ? BATTLE_POSITIONS.ATTACK_OFFSET : BATTLE_POSITIONS.HOME_OFFSET
+  }}
+>
+
         {/* Stats Display */}
         <div className="absolute -top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 w-40">
           {/* Shield Bar */}
