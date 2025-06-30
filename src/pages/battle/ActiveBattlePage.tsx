@@ -11,8 +11,6 @@ import type {
   ActiveBattle
 } from "../../utils/interefaces";
 import { currentTheme } from "../../constants/theme";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
 import Loading from "../../components/Loading";
 import { useNavigate } from "react-router-dom";
 import BattleScene from "../../components/BattleScene";
@@ -409,399 +407,408 @@ const processTurnsSequentially = async () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className={`min-h-screen flex flex-col ${theme.bg}`}>
-        <Header
-          theme={theme}
-          darkMode={darkMode}
-          onDarkModeToggle={() => setDarkMode(!darkMode)}
-        />
+    <div className="min-h-screen flex flex-row">
+      <div className={`min-h-screen flex flex-row w-[100%] ${theme.bg}`}>
+        <div className="flex-none w-[10%] flex justify-center">
+          <button
+            onClick={() => navigate("/")}
+            className={`px-6 py-3 ${theme.buttonBg} ${theme.buttonHover} ${theme.text} rounded-xl border ${theme.border} transition-all duration-300 hover:scale-105 h-[52px] mt-8`}
+          >
+            ← Back
+          </button>
+        </div>
+        <div className="flex-none w-[70%] flex items-center justify-center">
+          {/* Winner Announcement Overlay */}
+          {showWinnerAnnouncement && (
+            <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+              <div
+                className={`${theme.container} border ${theme.border} backdrop-blur-md p-8 rounded-xl animate-fade-in text-center`}
+              >
+                <h2 className="text-3xl font-bold mb-4 text-yellow-400">
+                  Battle Complete!
+                </h2>
+                <p className="text-xl text-white">
+                  {showWinnerAnnouncement.winner} has won the battle!
+                </p>
+              </div>
+            </div>
+          )}
 
-        {/* Battle Overlays */}
-        {walletStatus?.isUnlocked && activeBattle && (
-          <BattleOverlays
-            turns={activeBattle.turns}
-            showBattleLog={showBattleLog}
-            onToggleBattleLog={() => setShowBattleLog(!showBattleLog)}
-            theme={theme}
-            playerName={"Player 1's  " + activeBattle.challenger.name}
-            opponentName={"Player 2's  " + activeBattle.accepter.name}
-          />
-        )}
-
-        {/* Winner Announcement Overlay */}
-        {showWinnerAnnouncement && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div
+            className={`flex flex-col container mx-auto px-4 flex-1 ${theme.text}`}
+          >
             <div
-              className={`${theme.container} border ${theme.border} backdrop-blur-md p-8 rounded-xl animate-fade-in text-center`}
+              className="w-full mx-auto flex flex-col items-center"
+              style={{ maxWidth: "95vw" }}
             >
-              <h2 className="text-3xl font-bold mb-4 text-yellow-400">
-                Battle Complete!
-              </h2>
-              <p className="text-xl text-white">
-                {showWinnerAnnouncement.winner} has won the battle!
-              </p>
+              {!wallet?.address ? (
+                <div
+                  className={`p-6 rounded-xl ${theme.container} border ${theme.border} backdrop-blur-md text-center`}
+                >
+                  <h2 className={`text-xl font-bold mb-4 ${theme.text}`}>
+                    Connect Wallet
+                  </h2>
+                  <p className={`mb-4 ${theme.text}`}>
+                    Please connect your wallet to view battle status.
+                  </p>
+                </div>
+              ) : initialLoading ? (
+                <div className="flex justify-center items-center py-12">
+                  <Loading darkMode={darkMode} />
+                </div>
+              ) : !battleManagerInfo || !activeBattle ? (
+                <div
+                  className={`p-6 rounded-xl ${theme.container} border ${theme.border} backdrop-blur-md text-center`}
+                >
+                  <h2 className={`text-xl font-bold mb-4 ${theme.text}`}>
+                    No Active Battle
+                  </h2>
+                  <p className={`mb-4 ${theme.text}`}>
+                    Returning to battle manager...
+                  </p>
+                </div>
+              ) : (
+                <div
+                  className={`rounded-xl ${theme.container} border ${theme.border} backdrop-blur-md`}
+                >
+                  {isUpdating && <UpdateIndicator />}
+                  {activeBattle.status === "ended" && (
+                    <button
+                      onClick={handleEndBattle}
+                      className="absolute top-4 right-4 z-20 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold transition-all duration-300"
+                    >
+                      Exit Battle
+                    </button>
+                  )}
+                  <div
+                    className={`rounded-lg ${theme.container} bg-opacity-20 transition-all duration-300 overflow-hidden`}
+                  >
+                    {/* Battle Scene */}
+                    <div
+                      className="relrelative mx-auto w-full max-w-[95vw]"
+                      style={{
+                        aspectRatio: "16 / 9",
+                        maxHeight: "60vh",
+                      }}
+                    >
+                      <BattleScene
+                        challenger={activeBattle.challenger}
+                        accepter={activeBattle.accepter}
+                        playerAnimation={playerAnimation}
+                        opponentAnimation={opponentAnimation}
+                        onPlayerAnimationComplete={() => {}}
+                        onOpponentAnimationComplete={() => {}}
+                        attackAnimation={attackAnimation}
+                        shieldRestoring={shieldRestoring}
+                        showEndOfRound={showEndOfRound}
+                        onAttackComplete={() => setAttackAnimation(null)}
+                        onShieldComplete={() => setShieldRestoring(false)}
+                        onRoundComplete={() => setShowEndOfRound(false)}
+                      />
+                      <BattleStats battle={activeBattle} theme={theme} />
+                    </div>
+                  </div>
+
+                  <div className="mt-2">
+                    {/* Moves */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pb-4">
+                      {/* Player Moves */}
+                      <div
+                        className={`p-4 rounded-lg ${theme.container} bg-opacity-20`}
+                      >
+                        <h4 className="text-md font-semibold mb-3">
+                          Challenger's Moves
+                        </h4>
+                        <div className="relative">
+                          {/* Regular moves */}
+                          <div className="grid grid-cols-2 gap-2 relative">
+                            {Object.entries(activeBattle.challenger.moves).map(
+                              ([moveName, move]) => (
+                                <button
+                                  key={moveName}
+                                  onClick={() => handleAttack(moveName)}
+                                  disabled={
+                                    isUpdating ||
+                                    movesDisabled ||
+                                    activeBattle.status === "ended" ||
+                                    move.count === 0
+                                  }
+                                  className={`w-full p-2 rounded-lg font-medium text-left transition-all duration-300 min-h-[80px]
+                                ${getMoveColor(
+                                  moveName,
+                                  move
+                                )} hover:brightness-110
+                                ${
+                                  activeBattle.status === "ended" ||
+                                  movesDisabled ||
+                                  move.count === 0
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                }
+                                text-white relative overflow-hidden group flex flex-col justify-between`}
+                                >
+                                  <div className="flex justify-between items-center relative">
+                                    <span className="capitalize">
+                                      {moveName}
+                                    </span>
+                                    <span className="text-sm opacity-75">
+                                      {move.count}
+                                    </span>
+                                  </div>
+                                  {move.count === 0 && (
+                                    <div className="absolute inset-0 bg-black/50 pointer-events-none">
+                                      <div className="absolute inset-0 flex items-center">
+                                        <div className="w-full h-0.5 bg-red-500 transform rotate-12"></div>
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="text-sm mt-1">
+                                    <div className="grid grid-cols-3 grid-rows-2 gap-1 max-w-[200px] min-h-[32px]">
+                                      {move.damage !== 0 && (
+                                        <span>
+                                          ⚔️ {move.damage > 0 ? "+" : ""}
+                                          {move.damage}
+                                        </span>
+                                      )}
+                                      {move.attack !== 0 && (
+                                        <span>
+                                          💪 {move.attack > 0 ? "+" : ""}
+                                          {move.attack}
+                                        </span>
+                                      )}
+                                      {move.defense !== 0 && (
+                                        <span>
+                                          🛡️ {move.defense > 0 ? "+" : ""}
+                                          {move.defense}
+                                        </span>
+                                      )}
+                                      {move.speed !== 0 && (
+                                        <span>
+                                          ⚡ {move.speed > 0 ? "+" : ""}
+                                          {move.speed}
+                                        </span>
+                                      )}
+                                      {move.health !== 0 && (
+                                        <span>
+                                          ❤️ {move.health > 0 ? "+" : ""}
+                                          {move.health}
+                                        </span>
+                                      )}
+                                      {/* Add empty spans to maintain 3x2 grid layout */}
+                                      {[
+                                        ...Array(
+                                          6 -
+                                            [
+                                              move.damage,
+                                              move.attack,
+                                              move.defense,
+                                              move.speed,
+                                              move.health,
+                                            ].filter((v) => v !== 0).length
+                                        ),
+                                      ].map((_, i) => (
+                                        <span key={i} className="invisible">
+                                          placeholder
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                                </button>
+                              )
+                            )}
+
+                            {/* Struggle button - show when all moves have 0 uses */}
+                            {Object.values(activeBattle.challenger.moves).every(
+                              (move) => move.count === 0
+                            ) && (
+                              <button
+                                onClick={() => handleAttack("struggle")}
+                                disabled={
+                                  isUpdating ||
+                                  movesDisabled ||
+                                  activeBattle.status === "ended"
+                                }
+                                className={`absolute inset-0 m-auto w-32 h-32 p-2 rounded-lg font-medium transition-all duration-300 
+                                bg-purple-500 hover:brightness-110 z-10
+                                ${
+                                  activeBattle.status === "ended" ||
+                                  movesDisabled
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                }
+                                text-white overflow-hidden group flex flex-col justify-center items-center`}
+                              >
+                                <span className="capitalize text-lg mb-1">
+                                  Struggle
+                                </span>
+                                <span className="text-sm opacity-75 mb-2">
+                                  Last Resort
+                                </span>
+                                <span className="text-sm">⚔️ +1</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Opponent Moves */}
+                      <div
+                        className={`p-4 rounded-lg ${theme.container} bg-opacity-20`}
+                      >
+                        <h4 className="text-md font-semibold mb-3">
+                          Accepter's Moves
+                        </h4>
+                        <div className="relative">
+                          <div className="grid grid-cols-2 gap-2 relative">
+                            {Object.entries(activeBattle.accepter.moves).map(
+                              ([moveName, move]) => (
+                                <button
+                                  key={moveName}
+                                  onClick={() => handleAttack(moveName)}
+                                  disabled={
+                                    isUpdating ||
+                                    movesDisabled ||
+                                    activeBattle.status === "ended" ||
+                                    move.count === 0
+                                  }
+                                  className={`w-full p-2 rounded-lg font-medium text-left transition-all duration-300 min-h-[80px]
+                                ${getMoveColor(
+                                  moveName,
+                                  move
+                                )} hover:brightness-110
+                                ${
+                                  activeBattle.status === "ended" ||
+                                  movesDisabled ||
+                                  move.count === 0
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                }
+                                text-white relative overflow-hidden group flex flex-col justify-between`}
+                                >
+                                  <div className="flex justify-between items-center relative">
+                                    <span className="capitalize">
+                                      {moveName}
+                                    </span>
+                                    <span className="text-sm opacity-75">
+                                      {move.count}
+                                    </span>
+                                  </div>
+                                  {move.count === 0 && (
+                                    <div className="absolute inset-0 bg-black/50 pointer-events-none">
+                                      <div className="absolute inset-0 flex items-center">
+                                        <div className="w-full h-0.5 bg-red-500 transform rotate-12"></div>
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="text-sm mt-1">
+                                    <div className="grid grid-cols-3 grid-rows-2 gap-1 max-w-[200px] min-h-[32px]">
+                                      {move.damage !== 0 && (
+                                        <span>
+                                          ⚔️ {move.damage > 0 ? "+" : ""}
+                                          {move.damage}
+                                        </span>
+                                      )}
+                                      {move.attack !== 0 && (
+                                        <span>
+                                          💪 {move.attack > 0 ? "+" : ""}
+                                          {move.attack}
+                                        </span>
+                                      )}
+                                      {move.defense !== 0 && (
+                                        <span>
+                                          🛡️ {move.defense > 0 ? "+" : ""}
+                                          {move.defense}
+                                        </span>
+                                      )}
+                                      {move.speed !== 0 && (
+                                        <span>
+                                          ⚡ {move.speed > 0 ? "+" : ""}
+                                          {move.speed}
+                                        </span>
+                                      )}
+                                      {move.health !== 0 && (
+                                        <span>
+                                          ❤️ {move.health > 0 ? "+" : ""}
+                                          {move.health}
+                                        </span>
+                                      )}
+                                      {/* Add empty spans to maintain 3x2 grid layout */}
+                                      {[
+                                        ...Array(
+                                          6 -
+                                            [
+                                              move.damage,
+                                              move.attack,
+                                              move.defense,
+                                              move.speed,
+                                              move.health,
+                                            ].filter((v) => v !== 0).length
+                                        ),
+                                      ].map((_, i) => (
+                                        <span key={i} className="invisible">
+                                          placeholder
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                                </button>
+                              )
+                            )}
+
+                            {Object.values(activeBattle.accepter.moves).every(
+                              (move) => move.count === 0
+                            ) && (
+                              <button
+                                onClick={() => handleAttack("struggle")}
+                                disabled={
+                                  isUpdating ||
+                                  movesDisabled ||
+                                  activeBattle.status === "ended"
+                                }
+                                className={`absolute inset-0 m-auto w-32 h-32 p-2 rounded-lg font-medium transition-all duration-300 
+                                bg-purple-500 hover:brightness-110 z-10
+                                ${
+                                  activeBattle.status === "ended" ||
+                                  movesDisabled
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                }
+                                text-white overflow-hidden group flex flex-col justify-center items-center`}
+                              >
+                                <span className="capitalize text-lg mb-1">
+                                  Struggle
+                                </span>
+                                <span className="text-sm opacity-75 mb-2">
+                                  Last Resort
+                                </span>
+                                <span className="text-sm">⚔️ +1</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
-
-        <div className={`container mx-auto px-4 flex-1 ${theme.text}`}>
-          <div
-            className="w-full mx-auto flex flex-col items-center"
-            style={{ maxWidth: "95vw", height: "calc(100vh - 180px)" }}
-          >
-            {!wallet?.address ? (
-              <div
-                className={`p-6 rounded-xl ${theme.container} border ${theme.border} backdrop-blur-md text-center`}
-              >
-                <h2 className={`text-xl font-bold mb-4 ${theme.text}`}>
-                  Connect Wallet
-                </h2>
-                <p className={`mb-4 ${theme.text}`}>
-                  Please connect your wallet to view battle status.
-                </p>
-              </div>
-            ) : initialLoading ? (
-              <div className="flex justify-center items-center py-12">
-                <Loading darkMode={darkMode} />
-              </div>
-            ) : !battleManagerInfo || !activeBattle ? (
-              <div
-                className={`p-6 rounded-xl ${theme.container} border ${theme.border} backdrop-blur-md text-center`}
-              >
-                <h2 className={`text-xl font-bold mb-4 ${theme.text}`}>
-                  No Active Battle
-                </h2>
-                <p className={`mb-4 ${theme.text}`}>
-                  Returning to battle manager...
-                </p>
-              </div>
-            ) : (
-              <div
-                className={`rounded-xl ${theme.container} border ${theme.border} backdrop-blur-md`}
-              >
-                {isUpdating && <UpdateIndicator />}
-                {activeBattle.status === "ended" && (
-                  <button
-                    onClick={handleEndBattle}
-                    className="absolute top-4 right-4 z-20 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold transition-all duration-300"
-                  >
-                    Exit Battle
-                  </button>
-                )}
-                <div
-                  className={`rounded-lg ${theme.container} bg-opacity-20 transition-all duration-300 overflow-hidden`}
-                >
-                  {/* Battle Scene */}
-                  <div
-                    className="relative mx-auto"
-                    style={{
-                      height: "min(65vh, calc(100vh - 280px))",
-                      width: "min(calc((100vh - 280px) * 1.7777), calc(95vw))",
-                      maxHeight: "800px",
-                    }}
-                  >
-                    <BattleScene
-                      challenger={activeBattle.challenger}
-                      accepter={activeBattle.accepter}
-                      playerAnimation={playerAnimation}
-                      opponentAnimation={opponentAnimation}
-                      onPlayerAnimationComplete={() => {}}
-                      onOpponentAnimationComplete={() => {}}
-                      attackAnimation={attackAnimation}
-                      shieldRestoring={shieldRestoring}
-                      showEndOfRound={showEndOfRound}
-                      onAttackComplete={() => setAttackAnimation(null)}
-                      onShieldComplete={() => setShieldRestoring(false)}
-                      onRoundComplete={() => setShowEndOfRound(false)}
-                    />
-                    <BattleStats battle={activeBattle} theme={theme} />
-                  </div>
-                </div>
-
-                <div className="mt-2">
-                  {/* Moves */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pb-4">
-                    {/* Player Moves */}
-                    <div
-                      className={`p-4 rounded-lg ${theme.container} bg-opacity-20`}
-                    >
-                      <h4 className="text-md font-semibold mb-3">
-                        Challenger's Moves
-                      </h4>
-                      <div className="relative">
-                        {/* Regular moves */}
-                        <div className="grid grid-cols-2 gap-2 relative">
-                          {Object.entries(activeBattle.challenger.moves).map(
-                            ([moveName, move]) => (
-                              <button
-                                key={moveName}
-                                onClick={() => handleAttack(moveName)}
-                                disabled={
-                                  isUpdating ||
-                                  movesDisabled ||
-                                  activeBattle.status === "ended" ||
-                                  move.count === 0
-                                }
-                                className={`w-full p-2 rounded-lg font-medium text-left transition-all duration-300 min-h-[80px]
-                                ${getMoveColor(
-                                  moveName,
-                                  move
-                                )} hover:brightness-110
-                                ${
-                                  activeBattle.status === "ended" ||
-                                  movesDisabled ||
-                                  move.count === 0
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                }
-                                text-white relative overflow-hidden group flex flex-col justify-between`}
-                              >
-                                <div className="flex justify-between items-center relative">
-                                  <span className="capitalize">{moveName}</span>
-                                  <span className="text-sm opacity-75">
-                                    {move.count}
-                                  </span>
-                                </div>
-                                {move.count === 0 && (
-                                  <div className="absolute inset-0 bg-black/50 pointer-events-none">
-                                    <div className="absolute inset-0 flex items-center">
-                                      <div className="w-full h-0.5 bg-red-500 transform rotate-12"></div>
-                                    </div>
-                                  </div>
-                                )}
-                                <div className="text-sm mt-1">
-                                  <div className="grid grid-cols-3 grid-rows-2 gap-1 max-w-[200px] min-h-[32px]">
-                                    {move.damage !== 0 && (
-                                      <span>
-                                        ⚔️ {move.damage > 0 ? "+" : ""}
-                                        {move.damage}
-                                      </span>
-                                    )}
-                                    {move.attack !== 0 && (
-                                      <span>
-                                        💪 {move.attack > 0 ? "+" : ""}
-                                        {move.attack}
-                                      </span>
-                                    )}
-                                    {move.defense !== 0 && (
-                                      <span>
-                                        🛡️ {move.defense > 0 ? "+" : ""}
-                                        {move.defense}
-                                      </span>
-                                    )}
-                                    {move.speed !== 0 && (
-                                      <span>
-                                        ⚡ {move.speed > 0 ? "+" : ""}
-                                        {move.speed}
-                                      </span>
-                                    )}
-                                    {move.health !== 0 && (
-                                      <span>
-                                        ❤️ {move.health > 0 ? "+" : ""}
-                                        {move.health}
-                                      </span>
-                                    )}
-                                    {/* Add empty spans to maintain 3x2 grid layout */}
-                                    {[
-                                      ...Array(
-                                        6 -
-                                          [
-                                            move.damage,
-                                            move.attack,
-                                            move.defense,
-                                            move.speed,
-                                            move.health,
-                                          ].filter((v) => v !== 0).length
-                                      ),
-                                    ].map((_, i) => (
-                                      <span key={i} className="invisible">
-                                        placeholder
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                              </button>
-                            )
-                          )}
-
-                          {/* Struggle button - show when all moves have 0 uses */}
-                          {Object.values(activeBattle.challenger.moves).every(
-                            (move) => move.count === 0
-                          ) && (
-                            <button
-                              onClick={() => handleAttack("struggle")}
-                              disabled={
-                                isUpdating ||
-                                movesDisabled ||
-                                activeBattle.status === "ended"
-                              }
-                              className={`absolute inset-0 m-auto w-32 h-32 p-2 rounded-lg font-medium transition-all duration-300 
-                                bg-purple-500 hover:brightness-110 z-10
-                                ${
-                                  activeBattle.status === "ended" ||
-                                  movesDisabled
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                }
-                                text-white overflow-hidden group flex flex-col justify-center items-center`}
-                            >
-                              <span className="capitalize text-lg mb-1">
-                                Struggle
-                              </span>
-                              <span className="text-sm opacity-75 mb-2">
-                                Last Resort
-                              </span>
-                              <span className="text-sm">⚔️ +1</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Opponent Moves */}
-                    <div
-                      className={`p-4 rounded-lg ${theme.container} bg-opacity-20`}
-                    >
-                      <h4 className="text-md font-semibold mb-3">
-                        Accepter's Moves
-                      </h4>
-                      <div className="relative">
-                        <div className="grid grid-cols-2 gap-2 relative">
-                          {Object.entries(activeBattle.accepter.moves).map(
-                            ([moveName, move]) => (
-                              <button
-                                key={moveName}
-                                onClick={() => handleAttack(moveName)}
-                                disabled={
-                                  isUpdating ||
-                                  movesDisabled ||
-                                  activeBattle.status === "ended" ||
-                                  move.count === 0
-                                }
-                                className={`w-full p-2 rounded-lg font-medium text-left transition-all duration-300 min-h-[80px]
-                                ${getMoveColor(
-                                  moveName,
-                                  move
-                                )} hover:brightness-110
-                                ${
-                                  activeBattle.status === "ended" ||
-                                  movesDisabled ||
-                                  move.count === 0
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                }
-                                text-white relative overflow-hidden group flex flex-col justify-between`}
-                              >
-                                <div className="flex justify-between items-center relative">
-                                  <span className="capitalize">{moveName}</span>
-                                  <span className="text-sm opacity-75">
-                                    {move.count}
-                                  </span>
-                                </div>
-                                {move.count === 0 && (
-                                  <div className="absolute inset-0 bg-black/50 pointer-events-none">
-                                    <div className="absolute inset-0 flex items-center">
-                                      <div className="w-full h-0.5 bg-red-500 transform rotate-12"></div>
-                                    </div>
-                                  </div>
-                                )}
-                                <div className="text-sm mt-1">
-                                  <div className="grid grid-cols-3 grid-rows-2 gap-1 max-w-[200px] min-h-[32px]">
-                                    {move.damage !== 0 && (
-                                      <span>
-                                        ⚔️ {move.damage > 0 ? "+" : ""}
-                                        {move.damage}
-                                      </span>
-                                    )}
-                                    {move.attack !== 0 && (
-                                      <span>
-                                        💪 {move.attack > 0 ? "+" : ""}
-                                        {move.attack}
-                                      </span>
-                                    )}
-                                    {move.defense !== 0 && (
-                                      <span>
-                                        🛡️ {move.defense > 0 ? "+" : ""}
-                                        {move.defense}
-                                      </span>
-                                    )}
-                                    {move.speed !== 0 && (
-                                      <span>
-                                        ⚡ {move.speed > 0 ? "+" : ""}
-                                        {move.speed}
-                                      </span>
-                                    )}
-                                    {move.health !== 0 && (
-                                      <span>
-                                        ❤️ {move.health > 0 ? "+" : ""}
-                                        {move.health}
-                                      </span>
-                                    )}
-                                    {/* Add empty spans to maintain 3x2 grid layout */}
-                                    {[
-                                      ...Array(
-                                        6 -
-                                          [
-                                            move.damage,
-                                            move.attack,
-                                            move.defense,
-                                            move.speed,
-                                            move.health,
-                                          ].filter((v) => v !== 0).length
-                                      ),
-                                    ].map((_, i) => (
-                                      <span key={i} className="invisible">
-                                        placeholder
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                              </button>
-                            )
-                          )}
-
-                          {Object.values(activeBattle.accepter.moves).every(
-                            (move) => move.count === 0
-                          ) && (
-                            <button
-                              onClick={() => handleAttack("struggle")}
-                              disabled={
-                                isUpdating ||
-                                movesDisabled ||
-                                activeBattle.status === "ended"
-                              }
-                              className={`absolute inset-0 m-auto w-32 h-32 p-2 rounded-lg font-medium transition-all duration-300 
-                                bg-purple-500 hover:brightness-110 z-10
-                                ${
-                                  activeBattle.status === "ended" ||
-                                  movesDisabled
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                }
-                                text-white overflow-hidden group flex flex-col justify-center items-center`}
-                            >
-                              <span className="capitalize text-lg mb-1">
-                                Struggle
-                              </span>
-                              <span className="text-sm opacity-75 mb-2">
-                                Last Resort
-                              </span>
-                              <span className="text-sm">⚔️ +1</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
-        <Footer darkMode={darkMode} />
+        <div className="flex-none w-[20%] flex items-center justify-center">
+          {/* Battle Overlays */}
+          {walletStatus?.isUnlocked && activeBattle && (
+            <BattleOverlays
+              turns={activeBattle.turns}
+              showBattleLog={showBattleLog}
+              onToggleBattleLog={() => setShowBattleLog(!showBattleLog)}
+              theme={theme}
+              playerName={"Player 1's  " + activeBattle.challenger.name}
+              opponentName={"Player 2's  " + activeBattle.accepter.name}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
