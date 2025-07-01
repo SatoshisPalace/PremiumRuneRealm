@@ -12,7 +12,7 @@ const BattleLogToggle: React.FC<BattleLogToggleProps> = ({ turns, isOpen, onTogg
   if (isOpen) return null;
   
   return (
-    <div style={{ top: '25vh' }} className="fixed left-4 z-50">
+    <div style={{ top: '32px' }} className="fixed right-4 z-50">
       <button
         onClick={onToggle}
         className={`px-4 py-2 rounded-lg font-bold transition-all duration-300 
@@ -22,6 +22,7 @@ const BattleLogToggle: React.FC<BattleLogToggleProps> = ({ turns, isOpen, onTogg
         <span className="text-sm">({turns.length} turns)</span>
       </button>
     </div>
+
   );
 };
 
