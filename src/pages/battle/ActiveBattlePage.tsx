@@ -423,7 +423,7 @@ const processTurnsSequentially = async () => {
       {/* Left Panel - Back Button */}
       <div className="flex-none w-[10%] flex justify-center items-start mt-8">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/battle")}
           className={`px-6 py-3 ${theme.buttonBg} ${theme.buttonHover} ${theme.text} rounded-xl border ${theme.border} transition-all duration-300 hover:scale-105 h-[52px]`}
         >
           ← Back
